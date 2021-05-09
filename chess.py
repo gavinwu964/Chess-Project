@@ -23,10 +23,20 @@ class LegalMove(Chess):
 
     def __init__(self):
         super().__init__()
+        self._whitePieces = ['wP', 'wR', 'wN', 'wB', 'wQ', 'wK']
+        self._blackPieces = ['bP', 'bR', 'bN', 'bB', 'bQ', 'bK']
 
     def out_of_board(self):
         for i in self.targetSquare:
             if i < 0 or i > 7:
+                self.isLegalMove = False
+
+    def self_capture(self):
+        if self.board[self.currentSquare[0]][self.currentSquare[1]] in self._whitePieces:
+            if self.board[self.targetSquare[0]][self.targetSquare[1]] in self._whitePieces:
+                self.isLegalMove = False
+        if self.board[self.currentSquare[0]][self.currentSquare[1]] in self._blackPieces:
+            if self.board[self.targetSquare[0]][self.targetSquare[1]] in self._blackPieces:
                 self.isLegalMove = False
 
     def rock(self):
