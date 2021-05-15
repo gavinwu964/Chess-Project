@@ -10,9 +10,19 @@ class Chess:
                       ['00', '00', '00', '00', '00', '00', '00', '00'],
                       ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
                       ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']]
+        self.pieceColor = {'White': ['wP', 'wR', 'wN', 'wB', 'wQ', 'wK'],
+                           'Black': ['bP', 'bR', 'bN', 'bB', 'bQ', 'bK']}
         self.currentSquare = [-1, -1]
         self.targetSquare = [-1, -1]
         self.isLegalMove = True
+
+    def compare_color(self, p1r, p1f, p2r, p2f):
+        """This method takes coordinates of two pieces and compares colors between them."""
+        if ((self.board[p1r][p1f] in self.pieceColor['White'] and
+             self.board[p2r][p2f] in self.pieceColor['Black']) or
+            (self.board[p1r][p1f] in self.pieceColor['Black'] and
+             self.board[p2r][p2f] in self.pieceColor['White'])):
+            return 1
 
 
 class LegalSquares(Chess):
@@ -20,53 +30,97 @@ class LegalSquares(Chess):
 
     def __init__(self):
         super().__init__()
-        self._pieceTypes = {'Pawn': ['wP', 'bP'], 'Rook': ['wR', 'bR'],
-                            'Knight': ['wN', 'bN'], 'Bishop': ['wB', 'bB'],
-                            'Queen': ['wQ', 'bQ'], 'King': ['wK', 'bK']}
-        self.run()
+        self._pieceType = {'Pawn': ['wP', 'bP'], 'Rook': ['wR', 'bR'],
+                           'Knight': ['wN', 'bN'], 'Bishop': ['wB', 'bB'],
+                           'Queen': ['wQ', 'bQ'], 'King': ['wK', 'bK']}
+        self.run(self.currentSquare[0], self.currentSquare[1], self.targetSquare)
 
-    def rook(self):
+    def rook(self, rank, file):
         """This method generates a list of Rook's legal squares."""
         result = []
         # Generates legal squares vertically.
-        for i in range(1, self.currentSquare[0]):  # going upwards
-            if self.board[i][self.currentSquare[1]] != '00':
+        for i in range(1, rank + 1):  # going upwards
+            if self.board[rank - i][file] != '00':
+                if self.compare_color(rank, file, rank - i, file) == 1:
+                    result.append([rank - i, file])
                 break
-            result.append([i, self.currentSquare[1]])
-        for i in range(self.currentSquare[0]+1, 8):  # going downwards
-            if self.board[i][self.currentSquare[1]] != '00':
+            result.append([rank - i, file])
+        for i in range(rank + 1, 8):  # going downwards
+            if self.board[i][file] != '00':
+                if self.compare_color(rank, file, i, file) == 1:
+                    result.append([i, file])
                 break
-            result.append([i, self.currentSquare[1]])
+            result.append([i, file])
 
-        # Generates legal squares Horizontally.
-        for i in range(1, self.currentSquare[1]):  # going to the left
-            if self.board[self.currentSquare[0]][i] != '00':
+        # Generates legal squares horizontally.
+        for i in range(1, file + 1):  # going to the left
+            if self.board[rank][file - i] != '00':
+                if self.compare_color(rank, file, rank, file - i) == 1:
+                    result.append([rank, file - i])
                 break
-            result.append([self.currentSquare[0], i])
-        for i in range(self.currentSquare[1]+1, 8):  # going to the right
-            if self.board[self.currentSquare[0]][i] != '00':
+            result.append([rank, file - i])
+        for i in range(file + 1, 8):  # going to the right
+            if self.board[rank][i] != '00':
+                if self.compare_color(rank, file, rank, i) == 1:
+                    result.append([rank, i])
                 break
-            result.append([self.currentSquare[0], i])
+            result.append([rank, i])
         return result
 
-    def run(self):
-        """This method checks whether self.targetSquare is a legal square."""
-        if self.board[self.currentSquare[0]][self.currentSquare[1]] in \
-                self._pieceTypes['Pawn']:
+    def bishop(self, rank, file):
+        """This method generates a list of Bishop's legal squares."""
+        result = []
+        # Generates legal squares for upper right.
+        for i in range(1, min(rank + 1, 8 - file)):
+            if self.board[rank - i][file + i] != '00':
+                if self.compare_color(rank, file, rank - i, file + i) == 1:
+                    result.append([rank - i, file + i])
+                break
+            result.append([rank - i, file + i])
+
+        # Generate legal squares for upper left.
+        for i in range(1, min(rank + 1, file + 1)):
+            if self.board[rank - i][file - i] != '00':
+                if self.compare_color(rank, file, rank - i, file - i) == 1:
+                    result.append([rank - i, file - i])
+                break
+            result.append([rank - i, file - i])
+
+        # Generate legal squares for lower left.
+        for i in range(1, min(8 - rank, file + 1)):
+            if self.board[rank + i][file - i] != '00':
+                if self.compare_color(rank, file, rank + i, file - i) == 1:
+                    result.append([rank + i, file - i])
+                break
+            result.append([rank + i, file - i])
+
+        # Generate legal squares for lower right.
+        for i in range(1, min(8 - rank, 8 - file)):
+            if self.board[rank + i][file + i] != '00':
+                if self.compare_color(rank, file, rank + i, file + i) == 1:
+                    result.append([rank + i, file + i])
+                break
+            result.append([rank + i, file + i])
+        return result
+
+    def queen(self, rank, file):
+        """This method generates a list of Queen's legal squares."""
+        return self.rook(rank, file) + self.bishop(rank, file)
+
+    def run(self, rank, file, target):
+        """This method checks whether target is a legal square."""
+        if self.board[rank][file] in self._pieceType['Pawn']:
             pass
-        elif self.board[self.currentSquare[0]][self.currentSquare[1]] in \
-                self._pieceTypes['Rook']:
-            if self.targetSquare not in self.rook():
+        elif self.board[rank][file] in self._pieceType['Rook']:
+            if target not in self.rook(file, rank):
                 self.isLegalMove = False
-        elif self.board[self.currentSquare[0]][self.currentSquare[1]] in \
-                self._pieceTypes['Knight']:
+        elif self.board[rank][file] in self._pieceType['Knight']:
             pass
-        elif self.board[self.currentSquare[0]][self.currentSquare[1]] in \
-                self._pieceTypes['Bishop']:
-            pass
-        elif self.board[self.currentSquare[0]][self.currentSquare[1]] in \
-                self._pieceTypes['Queen']:
-            pass
-        elif self.board[self.currentSquare[0]][self.currentSquare[1]] in \
-                self._pieceTypes['King']:
+        elif self.board[rank][file] in self._pieceType['Bishop']:
+            if target not in self.bishop(rank, file):
+                self.isLegalMove = False
+        elif self.board[rank][file] in self._pieceType['Queen']:
+            if target not in self.queen(rank, file):
+                self.isLegalMove = False
+        elif self.board[rank][file] in self._pieceType['King']:
             pass
