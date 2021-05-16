@@ -20,8 +20,8 @@ class Chess:
         """This method takes coordinates of two pieces and compares colors between them."""
         if ((self.board[p1r][p1f] in self.pieceColor['White'] and
              self.board[p2r][p2f] in self.pieceColor['Black']) or
-                (self.board[p1r][p1f] in self.pieceColor['Black'] and
-                 self.board[p2r][p2f] in self.pieceColor['White'])):
+            (self.board[p1r][p1f] in self.pieceColor['Black'] and
+             self.board[p2r][p2f] in self.pieceColor['White'])):
             return 1
         else:
             return 0
