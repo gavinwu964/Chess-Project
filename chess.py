@@ -153,12 +153,14 @@ class LegalSquares(Chess):
     def run(self, rank, file, target):
         """This method checks whether target is a legal square."""
         if self.board[rank][file] in self._pieceType['Pawn']:
-            pass
+            if target not in self.pawn(rank, file):
+                self.isLegalMove = False
         elif self.board[rank][file] in self._pieceType['Rook']:
-            if target not in self.rook(file, rank):
+            if target not in self.rook(rank, file):
                 self.isLegalMove = False
         elif self.board[rank][file] in self._pieceType['Knight']:
-            pass
+            if target not in self.knight(rank, file):
+                self.isLegalMove = False
         elif self.board[rank][file] in self._pieceType['Bishop']:
             if target not in self.bishop(rank, file):
                 self.isLegalMove = False
