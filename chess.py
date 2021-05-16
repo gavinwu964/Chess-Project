@@ -20,8 +20,8 @@ class Chess:
         """This method takes coordinates of two pieces and compares colors between them."""
         if ((self.board[p1r][p1f] in self.pieceColor['White'] and
              self.board[p2r][p2f] in self.pieceColor['Black']) or
-            (self.board[p1r][p1f] in self.pieceColor['Black'] and
-             self.board[p2r][p2f] in self.pieceColor['White'])):
+                (self.board[p1r][p1f] in self.pieceColor['Black'] and
+                 self.board[p2r][p2f] in self.pieceColor['White'])):
             return 1
         else:
             return 0
@@ -112,10 +112,10 @@ class LegalSquares(Chess):
     def knight(self, rank, file):
         """This method generates a list of Knight's legal squares."""
         result = []
-        potentialSquares = [[rank + 1, file + 2], [rank + 1, file - 2], [rank - 1, file + 2],
-                            [rank - 1, file - 2], [rank + 2, file + 1], [rank + 2, file - 1],
-                            [rank - 2, file + 1], [rank - 2, file - 1]]
-        for square in potentialSquares:
+        potential_squares = [[rank + 1, file + 2], [rank + 1, file - 2], [rank - 1, file + 2],
+                             [rank - 1, file - 2], [rank + 2, file + 1], [rank + 2, file - 1],
+                             [rank - 2, file + 1], [rank - 2, file - 1]]
+        for square in potential_squares:
             if 0 <= square[0] <= 7 and 0 <= square[1] <= 7:
                 if self.board[square[0]][square[1]] == '00' or \
                         self.compare_color(rank, file, square[0], square[1]) == 1:
@@ -141,18 +141,32 @@ class LegalSquares(Chess):
                 result.append([rank + 1, file + 1])
         return result
 
-    def king(self, rank, file):
+    def brave_king(self, rank, file):
+        """This method generates a list of King's legal squares without checking danger square."""
+        result = []
+        potential_squares = [[rank + 1, file - 1], [rank + 1, file], [rank + 1, file + 1],
+                             [rank, file - 1], [rank, file + 1], [rank - 1, file - 1],
+                             [rank - 1, file], [rank - 1, file + 1]]
+        for square in potential_squares:
+            if 0 <= square[0] <= 7 and 0 <= square[1] <= 7:
+                if self.board[square[0]][square[1]] == '00' or \
+                        self.compare_color(rank, file, square[0], square[1]) == 1:
+                    result.append(square)
+        return result
+
+    def danger_squares(self, rank, file):
+        """This method generates a list of King's danger squares."""
+        danger_squares = []
+        return danger_squares
+
+    @staticmethod
+    def king(potential_squares, danger_squares):
         """This method generates a list of King's legal squares."""
         result = []
-        potentialSquares = [[rank + 1, file - 1], [rank + 1, file], [rank + 1, file + 1],
-                            [rank, file - 1], [rank, file + 1], [rank - 1, file - 1],
-                            [rank - 1, file], [rank - 1, file + 1]]
-        for square in potentialSquares:
-            if 0 <= square[0] <= 7 and 0 <= square[1] <= 7:
-                # if king is in check in potential square or potential square is in danger squares
-                # then don't add
-                break
-        pass
+        for square in potential_squares:
+            if square not in danger_squares:
+                result.append(square)
+        return result
 
     def run(self, rank, file, target):
         """This method checks whether target is a legal square."""
@@ -172,11 +186,6 @@ class LegalSquares(Chess):
             if target not in self.queen(rank, file):
                 self.isLegalMove = False
         elif self.board[rank][file] in self._pieceType['King']:
-            pass
-
-
-class GameState(Chess):
-    """"""
-
-    def __init__(self):
-        super().__init__()
+            if target not in self.king(self.brave_king(rank, file),
+                                       self.danger_squares(rank, file)):
+                self.isLegalMove = False
