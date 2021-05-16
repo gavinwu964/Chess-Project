@@ -128,17 +128,21 @@ class LegalSquares(Chess):
         if self.board[rank][file] in self.pieceColor['White']:
             if self.board[rank - 1][file] == '00':
                 result.append([rank - 1, file])
-            if self.board[rank - 1][file - 1] in self.pieceColor['Black'] and file != 0:
-                result.append([rank - 1, file - 1])
-            if self.board[rank - 1][file + 1] in self.pieceColor['Black'] and file != 7:
-                result.append([rank - 1, file + 1])
+            if file != 0:
+                if self.board[rank - 1][file - 1] in self.pieceColor['Black']:
+                    result.append([rank - 1, file - 1])
+            if file != 7:
+                if self.board[rank - 1][file + 1] in self.pieceColor['Black']:
+                    result.append([rank - 1, file + 1])
         else:
             if self.board[rank + 1][file] == '00':
                 result.append([rank + 1, file])
-            if self.board[rank + 1][file - 1] in self.pieceColor['White'] and file != 0:
-                result.append([rank + 1, file - 1])
-            if self.board[rank + 1][file + 1] in self.pieceColor['White'] and file != 7:
-                result.append([rank + 1, file + 1])
+            if file != 0:
+                if self.board[rank + 1][file - 1] in self.pieceColor['White'] and file != 0:
+                    result.append([rank + 1, file - 1])
+            if file != 7:
+                if self.board[rank + 1][file + 1] in self.pieceColor['White'] and file != 7:
+                    result.append([rank + 1, file + 1])
         return result
 
     def brave_king(self, rank, file):
@@ -156,8 +160,46 @@ class LegalSquares(Chess):
 
     def danger_squares(self, rank, file):
         """This method generates a list of King's danger squares."""
-        danger_squares = []
-        return danger_squares
+        result = []
+        if self.board[rank][file] in self.pieceColor['White']:  # for White King
+            for i in range(8):
+                for j in range(8):
+                    danger_squares = []
+                    if self.board[i][j] == 'bP':
+                        danger_squares.extend(self.pawn(i, j))
+                    elif self.board[i][j] == 'bR':
+                        danger_squares.extend(self.rook(i, j))
+                    elif self.board[i][j] == 'bN':
+                        danger_squares.extend(self.knight(i, j))
+                    elif self.board[i][j] == 'bB':
+                        danger_squares.extend(self.bishop(i, j))
+                    elif self.board[i][j] == 'bQ':
+                        danger_squares.extend(self.queen(i, j))
+                    elif self.board[i][j] == 'bK':
+                        danger_squares.extend(self.brave_king(i, j))
+                    for square in danger_squares:  # prevent duplicates list in result
+                        if square not in result:
+                            result.extend(danger_squares)
+        if self.board[rank][file] in self.pieceColor['Black']:  # for Black King
+            for i in range(8):
+                for j in range(8):
+                    danger_squares = []
+                    if self.board[i][j] == 'wP':
+                        danger_squares.extend(self.pawn(i, j))
+                    elif self.board[i][j] == 'wR':
+                        danger_squares.extend(self.rook(i, j))
+                    elif self.board[i][j] == 'wN':
+                        danger_squares.extend(self.knight(i, j))
+                    elif self.board[i][j] == 'wB':
+                        danger_squares.extend(self.bishop(i, j))
+                    elif self.board[i][j] == 'wQ':
+                        danger_squares.extend(self.queen(i, j))
+                    elif self.board[i][j] == 'wK':
+                        danger_squares.extend(self.brave_king(i, j))
+                    for square in danger_squares:  # prevent duplicates list in result
+                        if square not in result:
+                            result.extend(danger_squares)
+        return result
 
     @staticmethod
     def king(potential_squares, danger_squares):
