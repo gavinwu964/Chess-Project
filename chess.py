@@ -23,6 +23,8 @@ class Chess:
             (self.board[p1r][p1f] in self.pieceColor['Black'] and
              self.board[p2r][p2f] in self.pieceColor['White'])):
             return 1
+        else:
+            return 0
 
 
 class LegalSquares(Chess):
@@ -107,15 +109,58 @@ class LegalSquares(Chess):
         """This method generates a list of Queen's legal squares."""
         return self.rook(rank, file) + self.bishop(rank, file)
 
+    def knight(self, rank, file):
+        """This method generates a lisr of Knight's legal squares."""
+        result = []
+        potentialSquares = [[rank+1,file+2],[rank+1,file-2],[rank-1,file+2],[rank-1,file-2],[rank+2,file+1],[rank+2,file-1],[rank-2,file+1],[rank-2,file-1]]
+        for square in potentialSquares:
+            if square[0]>=0 and square[0] <=7 and square[1] >=0 and square[1] <=7:
+                if self.board[square[0]][square[1]] == '00' or self.compare_color(rank,file,square[0],square[1]) == 1:
+                    result.append(square)
+        return result
+
+    def pawn(self, rank, file):
+        """This method generates a list of Pawn's legal squares."""
+        result = []
+        if self.board[rank][file] in self.pieceColor['White']:
+            if self.board[rank-1][file] == '00':
+                result.append([rank-1, file])
+            if self.board[rank-1][file-1] != '00' and file != 0:
+                result.append([rank-1, file-1])
+            if self.board[rank-1][file+1] != '00' and file != 7:
+                result.append([rank-1, file+1])
+        else:
+            if self.board[rank+1][file] == '00':
+                result.append([rank+1, file])
+            if self.board[rank+1][file-1] != '00' and file != 0:
+                result.append([rank+1, file-1])
+            if self.board[rank+1][file+1] != '00' and file != 7:
+                result.append([rank+1, file+1])
+        return result
+
+    def king(self, rank, file):
+        """This method generates a list of King's legal squares."""
+        result = []
+        potentialSquares = [[rank+1,file-1],[rank+1,file],[rank+1,file+1],[rank,file-1],[rank,file+1],[rank-1,file-1],[rank-1,file],[rank-1,file+1]]
+        for square in potentialSquares:
+            if square[0]>=0 and square[0] <=7 and square[1] >=0 and square[1] <=7:
+                # if king is in check in potential square or potential square is in danger squares
+                # then don't add
+                break
+        pass
+
+
     def run(self, rank, file, target):
         """This method checks whether target is a legal square."""
         if self.board[rank][file] in self._pieceType['Pawn']:
-            pass
+            if target not in self.pawn(rank, file):
+                self.isLegalMove = False
         elif self.board[rank][file] in self._pieceType['Rook']:
-            if target not in self.rook(file, rank):
+            if target not in self.rook(rank, file):
                 self.isLegalMove = False
         elif self.board[rank][file] in self._pieceType['Knight']:
-            pass
+            if target not in self.knight(rank, file):
+                self.isLegalMove = False
         elif self.board[rank][file] in self._pieceType['Bishop']:
             if target not in self.bishop(rank, file):
                 self.isLegalMove = False
