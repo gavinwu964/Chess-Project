@@ -161,12 +161,31 @@ class LegalSquares(Chess):
     def danger_squares(self, rank, file):
         """This method generates a list of King's danger squares."""
         result = []
+        temp = {}
+        potential_king_squares = [[rank + 1, file - 1], [rank + 1, file], [rank + 1, file + 1],
+                                  [rank, file - 1], [rank, file + 1], [rank - 1, file - 1],
+                                  [rank - 1, file], [rank - 1, file + 1]]
+        # Since moving a piece to a square occupied by a piece of the same color is
+        # illegal, there are cases that opponent's piece around the king is guarded, but
+        # the square occupied by this piece is not marked as a danger square. Turn every
+        # opponent's pieces around the king into opposite-color pieces can resolve this problem.
+        for square in potential_king_squares:
+            if self.compare_color(rank, file, square[0], square[1]) == 1:
+                temp[self.board[square[0]][square[1]]] = square
+                if self.board[square[0]][square[1]] in self.pieceColor['White']:
+                    self.board[square[0]][square[1]] = 'bP'
+                else:
+                    self.board[square[0]][square[1]] = 'wP'
+
         if self.board[rank][file] in self.pieceColor['White']:  # for White King
             for i in range(8):
                 for j in range(8):
                     danger_squares = []
                     if self.board[i][j] == 'bP':
-                        danger_squares.extend(self.pawn(i, j))
+                        if j != 0:
+                            danger_squares.append([i + 1, j - 1])
+                        if j != 7:
+                            danger_squares.append([i + 1, j + 1])
                     elif self.board[i][j] == 'bR':
                         danger_squares.extend(self.rook(i, j))
                     elif self.board[i][j] == 'bN':
@@ -185,7 +204,10 @@ class LegalSquares(Chess):
                 for j in range(8):
                     danger_squares = []
                     if self.board[i][j] == 'wP':
-                        danger_squares.extend(self.pawn(i, j))
+                        if j != 0:
+                            danger_squares.append([i - 1, j - 1])
+                        if j != 7:
+                            danger_squares.append([i - 1, j + 1])
                     elif self.board[i][j] == 'wR':
                         danger_squares.extend(self.rook(i, j))
                     elif self.board[i][j] == 'wN':
@@ -199,6 +221,9 @@ class LegalSquares(Chess):
                     for square in danger_squares:  # prevent duplicate lists in result
                         if square not in result:
                             result.extend(danger_squares)
+
+        for piece, square in temp.items():  # revert the chess board
+            self.board[square[0]][square[1]] = piece
         return result
 
     @staticmethod
