@@ -177,7 +177,7 @@ class LegalSquares(Chess):
                 else:
                     self.board[square[0]][square[1]] = 'wP'
 
-        if self.board[rank][file] in self.pieceColor['White']:  # for White King
+        if self.board[rank][file] in self.pieceColor['White']:
             for i in range(8):
                 for j in range(8):
                     danger_squares = []
@@ -198,8 +198,8 @@ class LegalSquares(Chess):
                         danger_squares.extend(self.brave_king(i, j))
                     for square in danger_squares:  # prevent duplicate lists in result
                         if square not in result:
-                            result.extend(danger_squares)
-        if self.board[rank][file] in self.pieceColor['Black']:  # for Black King
+                            result.append(square)
+        else:
             for i in range(8):
                 for j in range(8):
                     danger_squares = []
@@ -220,7 +220,7 @@ class LegalSquares(Chess):
                         danger_squares.extend(self.brave_king(i, j))
                     for square in danger_squares:  # prevent duplicate lists in result
                         if square not in result:
-                            result.extend(danger_squares)
+                            result.append(square)
 
         for piece, square in temp.items():  # revert the chess board
             self.board[square[0]][square[1]] = piece
