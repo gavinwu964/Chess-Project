@@ -2,21 +2,11 @@ class GamePrep:
     """This class prepares the chess game."""
 
     def __init__(self):
-        self.initialBoard = [['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
-                             ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
-                             ['00', '00', '00', '00', '00', '00', '00', '00'],
-                             ['00', '00', '00', '00', '00', '00', '00', '00'],
-                             ['00', '00', '00', '00', '00', '00', '00', '00'],
-                             ['00', '00', '00', '00', '00', '00', '00', '00'],
-                             ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
-                             ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']]
         self.pieceColor = {'White': ['wP', 'wR', 'wN', 'wB', 'wQ', 'wK'],
                            'Black': ['bP', 'bR', 'bN', 'bB', 'bQ', 'bK']}
         self.pieceType = {'Pawn': ['wP', 'bP'], 'Rook': ['wR', 'bR'],
                           'Knight': ['wN', 'bN'], 'Bishop': ['wB', 'bB'],
                           'Queen': ['wQ', 'bQ'], 'King': ['wK', 'bK']}
-        self.game_state = {'isCheck': False, 'isStalemate': False, 'isCheckmate': False}
-        self.isLegalMove = True
 
     def compare_color(self, board, p1r, p1f, p2r, p2f):
         """This method takes coordinates of two pieces and compares colors between them."""
@@ -225,30 +215,32 @@ class GamePrep:
 
     def state(self, board, rank, file):
         """This method determines the game state."""
+        game_state = {'isCheck': False, 'isStalemate': False, 'isCheckmate': False}
         if [rank, file] in self.danger_squares(board, rank, file):
-            self.game_state['isCheck'] = True
+            game_state['isCheck'] = True
         if not self.king(board, rank, file):
-            self.game_state['isStalemate'] = True
-        if self.game_state['isCheck'] is True and self.game_state['isStalemate'] is True:
-            self.game_state['isCheckmate'] = True
+            game_state['isStalemate'] = True
+        if game_state['isCheck'] is True and game_state['isStalemate'] is True:
+            game_state['isCheckmate'] = True
+            return game_state
 
-    def run(self, board, rank, file, target):
+    def legal(self, board, rank, file, target):
         """This method checks whether target is a legal square."""
         if board[rank][file] in self.pieceType['Pawn']:
-            if target not in self.pawn(board, rank, file):
-                self.isLegalMove = False
+            if target in self.pawn(board, rank, file):
+                return True
         elif board[rank][file] in self.pieceType['Rook']:
-            if target not in self.rook(board, rank, file):
-                self.isLegalMove = False
+            if target in self.rook(board, rank, file):
+                return True
         elif board[rank][file] in self.pieceType['Knight']:
-            if target not in self.knight(board, rank, file):
-                self.isLegalMove = False
+            if target in self.knight(board, rank, file):
+                return True
         elif board[rank][file] in self.pieceType['Bishop']:
-            if target not in self.bishop(board, rank, file):
-                self.isLegalMove = False
+            if target in self.bishop(board, rank, file):
+                return True
         elif board[rank][file] in self.pieceType['Queen']:
-            if target not in self.queen(board, rank, file):
-                self.isLegalMove = False
+            if target in self.queen(board, rank, file):
+                return True
         elif board[rank][file] in self.pieceType['King']:
-            if target not in self.king(board, rank, file):
-                self.isLegalMove = False
+            if target in self.king(board, rank, file):
+                return True
